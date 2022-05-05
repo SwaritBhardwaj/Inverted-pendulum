@@ -1,5 +1,5 @@
 /* PURPOSE: to detect rpm by counting pulses from encoder */
-//#define motion_flag 0
+
 bool dir = 1;    // 1 for RIGHT
 int pwm = 0;
 bool motion = 0;
@@ -35,23 +35,6 @@ int total_pulses = 0;
 int pulses = 0;
 
 // DEFINING CONTROLLER CONSTANTS 
-//float k[4]={-14.142, -34.529, 580.911, 455.813};  // Gain
-//float k[4] = { -29.881, -56.007, 1070.502, 958.512 };
-//float k[4] = { -57.735, -20.802, 1032.357, 1830.648 }; // b = 1.5
-//float k[4] = { -57.735, -13.411, 880.955, 1828.706 }; // b= 2.5, R = 0.0003
-//float k[4] = { -100.0, -11.663, 1173.042, 3163.729 }; // workin alright but not perfect
-//float k[4] = { -100.0, -12.069, 1145.882, 3163.485 }; // a lil better
-//float k[4] = { -100.0, -10.308, 1072.345, 3162.497 }; // half weight
-//float k[4] = { -105.409, -10.408, 1129.795, 3333.563 }; //
-//float k[4] = { -70.014, -14.103, 1555.158, 7002.635 }; // Q changed
-//float k[4] = { -62.017, -12.594, 1378.707, 6202.833 }; // better
-//float k[4] = { -63.246, -22.323, 1807.058, 6326.583 }; // better
-//float k[4] = { -50.0, -27.51, 1752.28, 5002.525 }; //best
-//float nbar = -50.451;
-//float k[4] = { -50.0, -35.696, 1931.65, 5008.02 }; //actual weight .. best
-//float nbar = -50.0;
-//float k[4] = { -37.796, -58.134, 2112.932, 3792.804 };
-//float k[4] = { -20.0, -59.496, 1549.603, 2013.563 }; //actual weight .. try
 float k[4] = { -18.257, -85.051, 1865.405, 1878.538 }; 
 float nbar = -22.0;
 float desired_para[4][1] = {{0.0},{0.0},{0.0},{0.0}};
@@ -60,16 +43,14 @@ float error[4][1] = {{0.0}, {0.0}, {0.0}, {0.0}};
 float output = 0.0;
 
 void setup() {
-  // put your setup code here, to run once:
   pinMode(motorA, OUTPUT);  
   pinMode(motorB, OUTPUT);  
   pinMode(carriage_encoder_pin_B, INPUT_PULLUP);
   pinMode(pendulum_encoder_pin_B, INPUT_PULLUP);
-//  digitalWrite(pendulum_encoder_pin_B,HIGH);
+
   attachInterrupt(digitalPinToInterrupt(pendulum_encoder_pin_A), StartInterrupt_pendulum, RISING); // when it gets a signal at rising edge it will call StartInterruptA() function
-//  attachInterrupt(digitalPinToInterrupt(carriage_encoder_pin_A), StartInterrupt_carriage, RISING); // when it gets a signal at rising edge it will call StartInterruptA() function
+  attachInterrupt(digitalPinToInterrupt(carriage_encoder_pin_A), StartInterrupt_carriage, RISING); // when it gets a signal at rising edge it will call StartInterruptA() function
   Serial.begin(9600);
-//  delay(20);
 }
 
 void loop() {
@@ -88,7 +69,7 @@ void loop() {
   // if difference in times is greater than given duration, calculate the rpm using the pulse count and then set it to zero
   if (currentTime - previousTime > duration){
 
-//    detachInterrupt(carriage_encoder_pin_A);
+    detachInterrupt(carriage_encoder_pin_A);
     detachInterrupt(pendulum_encoder_pin_A);
     
     
@@ -98,23 +79,18 @@ void loop() {
     angle += (double(pulse_count_pendulum)*2.0*pi)/600.0;
     
 //    Serial.println("pulse = " + String(pulse_count_carriage) + " dist = " + String(dist));
-      Serial.println(String(dist) + " angle:  " + String(angle*180.0/pi));
+//      Serial.println(String(dist) + " angle:  " + String(angle*180.0/pi));
 //    Serial.println("pulse_count_carriage "+String(total_pulses));
 
     pulse_count_pendulum = 0;
     pulse_count_carriage = 0;    
 
-//    attachInterrupt(digitalPinToInterrupt(carriage_encoder_pin_A), StartInterrupt_carriage, RISING);
+    attachInterrupt(digitalPinToInterrupt(carriage_encoder_pin_A), StartInterrupt_carriage, RISING);
     attachInterrupt(digitalPinToInterrupt(pendulum_encoder_pin_A), StartInterrupt_pendulum, RISING);
     
   }
   
-////  if (dist>600.0 ){
-////    dir = 0;
-////  }
-////  else if (dist<0.0){
-////    dir = 1;
-////  }
+
   
   dist_dot = (dist-dist_prev)/float(duration);
   angle_dot = (angle-angle_prev)*1000.0/float(duration);
@@ -158,7 +134,6 @@ void loop() {
 //    Serial.println(String(pwm) + "  "  + String(angle*180.0/pi));
 //    Serial.println(output); 
   }
-//  else {pwm = 0;}
 }
 
 void StartInterrupt_pendulum(){
@@ -179,5 +154,4 @@ void StartInterrupt_carriage(){
     else{
             pulse_count_carriage += 1;      
     }
-//    total_pulses += pulse_count_carriage;
 }
